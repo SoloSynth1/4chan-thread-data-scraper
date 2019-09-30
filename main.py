@@ -12,6 +12,7 @@ from google.cloud import bigquery
 
 app = Flask(__name__)
 url = "https://boards.4chan.org/{}/catalog"
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "C:\\Users\\Almighty Yoyo\\PycharmProjects\\4chan-scraper\\keys\\credentials.json"
 bq_client = bigquery.Client()
 dataset_ref = bq_client.dataset('4chan')
 
@@ -37,9 +38,9 @@ def transform(thread_id, thread_json, fetch_time):
                    "image_replies": thread_json["i"],
                    "b": thread_json["b"],
                    "author": thread_json["author"],
-                   "imgurl": thread_json["imgurl"],
-                   "thumbnail_width": thread_json["tn_w"],
-                   "thumbnail_height": thread_json["tn_h"],
+                   "imgurl": thread_json["imgurl"] if "imgurl" in thread_json.keys() else None,
+                   "thumbnail_width": thread_json["tn_w"] if "tn_w" in thread_json.keys() else None,
+                   "thumbnail_height": thread_json["tn_h"] if "tn_h" in thread_json.keys() else None,
                    "sub": thread_json["sub"],
                    "teaser": thread_json["teaser"],
                    "fetch_time": fetch_time
@@ -69,6 +70,8 @@ def scrap_board():
         except Exception as e:
             msg = 'Error occured when scraping board'
             print(f'error: {msg}')
+            print(f'error: {e}')
+            print(f'error: {type(e)}')
             return f'Internal Server Error: {msg}', 500
     else:
         msg = 'board name not understood'
@@ -93,6 +96,7 @@ def scrape(board):
             transformed = transform(thread, threads['threads'][thread], fetch_time)
             rows.append(transformed)
         errors = bq_client.insert_rows(table, rows)  # API request
+        print("errors: {}".format(errors))
         assert errors == []
     else:
         print("error'd when fetching {}".format(target))

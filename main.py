@@ -12,7 +12,6 @@ from google.cloud import bigquery
 
 app = Flask(__name__)
 url = "https://boards.4chan.org/{}/catalog"
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "C:\\Users\\Almighty Yoyo\\PycharmProjects\\4chan-scraper\\keys\\credentials.json"
 bq_client = bigquery.Client()
 dataset_ref = bq_client.dataset('4chan')
 
